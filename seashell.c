@@ -300,6 +300,14 @@ int prompt(struct command_t *command)
   	return SUCCESS;
 }
 int process_command(struct command_t *command);
+
+//-----Helper-Functions----------------------
+
+int indexOf(char* str, char charToFind, int n);
+char* substring(char* str, int from,  int to);
+void tokenizer(char delimeter, char* lines[], char* path, int numOfLines);
+void executeCommand(char* command, char** params);
+
 int main()
 {
 	while (1)
@@ -364,7 +372,8 @@ int process_command(struct command_t *command)
 		// set args[arg_count-1] (last) to NULL
 		command->args[command->arg_count-1]=NULL;
 
-		execvp(command->name, command->args); // exec+args+path
+		//		execvp(command->name, command->args); // exec+args+path
+		executeCommand(command->name, command->args);
 		exit(0);
 		/// TODO: do your own exec with path resolving using execv()
 	}
@@ -379,4 +388,126 @@ int process_command(struct command_t *command)
 
 	printf("-%s: %s: command not found\n", sysname, command->name);
 	return UNKNOWN;
+}
+
+/**
+ * Finds the number of occurances of a character in a given string.
+ * @param  str         A string to find occurances of a given character in.
+ * @param  charToFind  A character to find the occurances of in a given string.
+ * @return             Returns the number of occurances of a character in a given string.
+ */
+int numberOfOccurances(char* str, char charToFind){
+  int count = 0;
+  char c = str[0];
+  
+  while(c != '\0'){
+    if(c == charToFind)
+      count++;
+    c = *(str++);
+  }
+  return count;
+}
+
+/*
+
+int contains(char* str, char charToFind){
+  char c = str[0];
+  while(c != '\0'){
+    if(c == charToFind)
+      return 1;
+    c = *(str++);
+  }
+  return 0;
+}
+*/
+
+//----Helper-Functions----------------------------
+
+/**
+ * Finds the index of a given character in a given string.
+ * @param  str         A string to extract an index of a given character from.
+ * @param  charToFind  A character whose index is to be returned.
+ * @param  n           The number of the occurance of a given character in the given string.
+ * @return             Returns the index of a character with n^th occurance in a given string..
+ */
+int indexOf(char* str, char charToFind, int n){
+  char c = str[0];  
+  for(int i = 0; i < strlen(str); i++){
+    if(charToFind == str[i]){
+      if(n == 1)
+	return i;
+      else
+	n--;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Given a string, start and end indecies, returns a substring according to the indecies.
+ * @param  str      A string to extract a substring from.
+ * @param  from     The index of the beginning of the substring.
+ * @param  to       The index of the end of the substring.
+ * @return          Returns a substring of a given string.
+ */
+char* substring(char* str, int from,  int to){
+  char* sub = malloc(strlen(str) * sizeof(char) + 1);
+  int j = 0;
+  for(int i = from; i < to; i++, j++){
+    sub[j] = str[i];
+  }
+  sub[j + 1] = '\0'; 
+  return sub;
+}
+
+/**
+ * Tokenizes a given string into a given array.
+ * @param  delimeter   The delimeter that the given array is to be tokenized according to.
+ * @param  lines       The array to add the tokens from the given string in. 
+ * @param  path        A string to be tokenized.
+ * @param  numOfLines  The number of tokens.
+ */
+void tokenizer(char delimeter, char* lines[], char* path, int numOfLines){
+  int low = 0;
+  int high = indexOf(path, delimeter, 1);
+
+  int occuranceNumber = 1;
+  char* line;
+  for(int i = 0; i < numOfLines; i++){
+    if(low == -1)
+      break;
+
+    lines[i] = substring(path, low, high);
+    
+    low = indexOf(path, delimeter, occuranceNumber) + 1; // In order to exclude the dilimeter.
+    high = indexOf(path, delimeter, occuranceNumber + 1);
+
+    if(occuranceNumber <= numOfLines)
+      occuranceNumber++;
+      }
+  }
+
+/**
+ * Executes a given command.
+ * @param  command  A command to be executed.
+ * @param  params   The arguments for the execv() methods.
+ */
+void executeCommand(char* command, char** params){
+  
+  char* str = getenv("PATH");
+  int numberOfPaths = numberOfOccurances(str, ':');
+  char token = ':';
+  
+  char* paths[numberOfPaths]; 
+  tokenizer(token, paths, str, numberOfPaths);
+  
+  for(int i = 0; i < numberOfPaths; i++){
+    strcat(paths[i], "/");
+    strcat(paths[i], command);
+  }
+  
+  for(int i = 0; i < numberOfPaths; i++){
+    params[0] = strdup(paths[i]);
+    execv(paths[i], params);
+  }
 }
