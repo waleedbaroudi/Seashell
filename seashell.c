@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <limits.h>
+
 const char * sysname = "seashell";
 
 enum return_codes {
@@ -308,8 +310,11 @@ char* substring(char* str, int from,  int to);
 void tokenizer(char delimeter, char* lines[], char* path, int numOfLines);
 void executeCommand(char* command, char** params);
 
+char customCommandDir[PATH_MAX];
+
 int main()
 {
+  getcwd(customCommandDir, sizeof(customCommandDir));
 	while (1)
 	{
 		struct command_t *command=malloc(sizeof(struct command_t));
@@ -408,19 +413,6 @@ int numberOfOccurances(char* str, char charToFind){
   return count;
 }
 
-/*
-
-int contains(char* str, char charToFind){
-  char c = str[0];
-  while(c != '\0'){
-    if(c == charToFind)
-      return 1;
-    c = *(str++);
-  }
-  return 0;
-}
-*/
-
 //----Helper-Functions----------------------------
 
 /**
@@ -498,15 +490,19 @@ void executeCommand(char* command, char** params){
   int numberOfPaths = numberOfOccurances(str, ':');
   char token = ':';
   
-  char* paths[numberOfPaths]; 
+  char* paths[numberOfPaths + 1]; 
   tokenizer(token, paths, str, numberOfPaths);
   
   for(int i = 0; i < numberOfPaths; i++){
     strcat(paths[i], "/");
     strcat(paths[i], command);
   }
+  strcpy(paths[numberOfPaths], customCommandDir);
   
-  for(int i = 0; i < numberOfPaths; i++){
+  strcat(paths[numberOfPaths], "/");
+  strcat(paths[numberOfPaths], command);
+  
+  for(int i = 0; i < numberOfPaths + 1; i++){
     params[0] = strdup(paths[i]);
     execv(paths[i], params);
   }

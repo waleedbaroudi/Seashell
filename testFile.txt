@@ -1,0 +1,2 @@
+The programming language used for this code is C.
+THe first three letters of English language are A B and C.
