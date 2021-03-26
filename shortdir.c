@@ -29,35 +29,6 @@ void set(char* input){
 }
 
 /**
- * given a name, jumps to the directory associated with this name
- */
-void jump(char* input) {
-   FILE *shortDirsFile;
-
-   shortDirsFile = fopen(dirsPath, "r");
-
-   char buff[255];
-   int r;
-    while (1)
-    { // search for an associated directory
-        fscanf(shortDirsFile, "%s", buff);
-        if(feof(shortDirsFile)) // hit end of file
-            break;
-         if(strcmp(input, buff)==0) { // found match
-            fscanf(shortDirsFile, "%s", buff);
-            r=chdir(buff); // change directory
-			   if (r==-1)
-				   printf("error while changing directory\n");
-            fclose(shortDirsFile);
-            return;
-         }
-    }
-   // loop terminated before finding a match
-	printf("shortdir with the name '%s' does not exist.\n", input);
-   fclose(shortDirsFile);
-}
-
-/**
  * replaces the contents of origFile with those of tempFile
  * this method is used in conjunction with 'delete' method to rewrite the contents
  * of shortdirs.txt after a deletion
@@ -180,10 +151,7 @@ int main(int argc, char *argv[]) {
       return 0;
    }
 
-   if(strcmp(op, "jump") == 0) {
-      jump(argv[2]);
-      return 0;
-   }
+   // jump is handled inside seashell.c
 
    // exit with error if an unknown operation was entered
    return -1;

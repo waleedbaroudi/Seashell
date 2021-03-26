@@ -310,11 +310,21 @@ char* substring(char* str, int from,  int to);
 void tokenizer(char delimeter, char* lines[], char* path, int numOfLines);
 void executeCommand(char* command, char** params);
 
-char customCommandDir[PATH_MAX];
+// shortdir jump declarations //
+void jump(char* input);
+char *homedir; // home directory on the current machine (to place the shortdirs in)
+char dirsPath[PATH_MAX]; // file path of the text file stroing shortdirs
+////
+char customCommandDir[PATH_MAX]; // Path to custom command executables
 
 int main()
 {
   getcwd(customCommandDir, sizeof(customCommandDir));
+	// set home and shortdir paths
+   homedir = getenv("HOME");
+   strcpy(dirsPath, homedir);
+   strcat(dirsPath, "/Documents/dirs.txt");
+
 	while (1)
 	{
 		struct command_t *command=malloc(sizeof(struct command_t));
@@ -351,6 +361,12 @@ int process_command(struct command_t *command)
 				printf("-%s: %s: %s\n", sysname, command->name, strerror(errno));
 			return SUCCESS;
 		}
+	}
+
+	if ((strcmp(command->name, "shortdir")==0) && (strcmp(command->args[0], "jump")==0))
+	{
+		jump(command->args[1]);
+		return SUCCESS;
 	}
 
 	pid_t pid=fork();
@@ -412,6 +428,34 @@ int numberOfOccurances(char* str, char charToFind){
   }
   return count;
 }
+
+//----Shortdir Implementation----------------------------
+void jump(char* input) {
+   FILE *shortDirsFile;
+
+   shortDirsFile = fopen(dirsPath, "r");
+
+   char buff[255];
+   int r;
+    while (1)
+    { // search for an associated directory
+        fscanf(shortDirsFile, "%s", buff);
+        if(feof(shortDirsFile)) // hit end of file
+            break;
+         if(strcmp(input, buff)==0) { // found match
+            fscanf(shortDirsFile, "%s", buff);
+            r=chdir(buff); // change directory
+			   if (r==-1)
+				   printf("error while changing directory\n");
+            fclose(shortDirsFile);
+            return;
+         }
+    }
+   // loop terminated before finding a match
+	printf("shortdir with the name '%s' does not exist.\n", input);
+   fclose(shortDirsFile);
+}
+
 
 //----Helper-Functions----------------------------
 
