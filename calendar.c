@@ -32,6 +32,70 @@ Event* makeEvent(char* title,
         return event;
 }
 
+/**
+ * this method takes time and date and rewinds it 10 minutes
+ */
+void rewindTenMinutes(char **min, char **hour, char **day, char **month) {
+
+    int numMin = atoi(*min);
+    char newMin[3];
+    if (numMin >= 10)
+    {
+        sprintf(newMin, "%d", numMin-10);
+        *min = newMin;
+        return;
+    }
+
+    sprintf(newMin, "%d", 60+(numMin-10));
+    *min = newMin;
+
+    if (strcmp(*hour, "all") == 0) // an hourly reminder
+        return;
+
+    int numHour = atoi(*hour);
+    char newHour[3];
+    if (numHour > 0)
+    {
+        sprintf(newHour, "%d", numHour-1);
+        *hour = newHour;
+        return;
+    }
+
+    sprintf(newHour, "%d", 11);
+    *hour = newHour;
+
+    if (strcmp(*day, "all") == 0) // a daily reminder
+        return;
+
+    int numDay = atoi(*day);
+    char newDay[3];
+    if (numDay > 1)
+    {
+        sprintf(newDay, "%d", numDay-1);
+        *day = newDay;
+        return;
+    }
+
+    sprintf(newDay, "%d", 30); // assuming all months are 30 days
+    *day = newDay;
+
+    if (strcmp(*month, "all") == 0) // a monthly reminder
+        return;
+
+    int numMonth = atoi(*month);
+    char newMonth[3];
+    if (numMonth > 1)
+    {
+        sprintf(newMonth, "%d", numMonth-1);
+        *month = newMonth;
+        return;
+    }
+
+    sprintf(newMonth, "%d", 11); // assuming all months are 30 days
+    *month = newMonth;
+}
+
+
 void schedule(Event *event) {
     Event e = *event;
     // printf("Title: %s\nDescription: %s\nTime: %s\nDate: %s\nRemind? %s\n",
@@ -56,11 +120,20 @@ void schedule(Event *event) {
          day, 
          month, 
          e.title, 
-         e.description); // write crontab job
+         e.description); // write crontab job for the schedule
 
     if (e.shouldRemind)
     {
-        ///TODO: add crontab for 10 mins earlier.
+        rewindTenMinutes(&minute, &hour, &day, &month);
+        fprintf(schedsFile, "%s %s %s %s * XDG_RUNTIME_DIR=/run/user/$(id -u) notify-send 'Reminder: %s' '[IN 10 MINUTES] %s'\n",
+         minute, 
+         hour, 
+         day, 
+         month, 
+         e.title, 
+         e.description); // write crontab job for the reminder
+    } else {
+        fprintf(schedsFile, "\n");
     }
     
     fclose(schedsFile);
