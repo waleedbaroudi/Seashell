@@ -197,10 +197,10 @@ void printEventInfo(Event e){
   printf("| Title: \x1b[36m%s\x1b[0m\n", e.title);
   printf("| Description: \x1b[36m%s\x1b[0m\n", e.description);
   printf("|----------------------------------------+\n");
-  printf("| On: %stAt: %s\n", e.date, e.time);
+  printf("| On: %s At: %s\n", e.date, e.time);
   printf("|----------------------------------------+\n");
   printf("| Reminder: %s\n", e.shouldRemind? "\x1b[32menabled\x1b[0m" : "\x1b[31mnot enabled\x1b[0m");
-  printf("\\_________________________________________\n");
+  printf("\\_________________________________________\n\n");
 }
 
 
