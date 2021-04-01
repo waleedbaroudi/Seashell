@@ -2,6 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
+#include <ctype.h>
+
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+void printfWeather(char* weatherState, double tempreture, double humidity);
+void printWeatherIcon(char* weatherState);
+char* getTempColor(double tempreture);
+char* wordToLower(char* word);
+int contains(char* word, char* wordToCheck);
 
 char* myData;
 size_t dataLen;
@@ -19,17 +33,20 @@ void printWeather() {
   char* humPart = strstr(myData, "humidity");
   strtok(humPart, ":");
   char *valuePart = strtok(NULL, ":");
-  printf("Humidity is is: %s%%\n", strtok(valuePart, ","));
-
+  char* humidity = strtok(valuePart, ",");
+  
   char* condPart = strstr(myData, "text");
   strtok(condPart, "\"");
   strtok(NULL, "\"");
-  printf("Condition is: %s\n", strtok(NULL, "\""));
-
+  
+  char* weatherCondition =  strtok(NULL, "\"");
   char* tempPart = strstr(myData, "temp_c");
   strtok(tempPart, ":");
   char *degPart = strtok(NULL, ":");
-  printf("Temprature is: %s degrees\n", strtok(degPart, ","));
+  char* tempreture = strtok(degPart, ",");
+
+  printfWeather(weatherCondition, tempreture, humidity);
+  
 }
 
 int main()
@@ -68,4 +85,137 @@ int main()
     /* always cleanup */
     curl_easy_cleanup(curl);
   return 0;
+}
+
+void printfWeather(char* weatherState, double tempreture, double humidity){
+
+    printf("+-------------------------------------------------------------------+\n");
+    printf("| Weather: %s | Tempreture: %s%.2f%s C | Humidity: %.1f%%  |\n", weatherState, getTempColor(tempreture), tempreture, ANSI_COLOR_RESET, humidity);
+    printf("+-------------------------------------------------------------------+\n\n");
+
+    printWeatherIcon(weatherState);
+
+    printf("_____________________________________________________________\n\n");
+}
+
+/**
+ * Given a tempreture vlaue in Celius, returns the tempreture with a describtive color.
+ */
+char* getTempColor(double tempreture){
+    if(tempreture <= 15){
+        return ANSI_COLOR_BLUE;
+    }
+    else if(tempreture <= 35 && tempreture > 15){
+        return ANSI_COLOR_GREEN;
+    }
+    else if(tempreture > 35){
+        return ANSI_COLOR_RED;
+    }
+    return ANSI_COLOR_RESET;
+}
+
+void printWeatherIcon(char* weatherState){
+
+    char sunny[11][24] = {ANSI_COLOR_YELLOW"           |",
+                    "    \\      |       /",
+                    "     \\   ______   /",
+                    "        /      \\",
+                    " ____  /        \\  _____",
+                    "      |          |",
+                    "       \\        /",
+                    "     /  \\______/  \\",
+                    "    /              \\",
+                    "            |",
+                    "            |"ANSI_COLOR_RESET};
+
+    char cloudy[8][33] = {ANSI_COLOR_YELLOW"                    |",
+                    "              \\     |     /",
+                    "               \\ _______ /",
+                    "           ___  /       \\  ____",
+                    "      \x1b[0m_________/_________\\_",
+                    "   __(        (     )      )",
+                    "  /       (           )     \\_",
+                    " (___(________________________)"};
+
+    char rainy[7][40] = {"             __________",
+                    "      ______(          )___",
+                    "   __(        (     )      )_",
+                    "  /       (           )      \\_",
+                    " (___(_________________________)",
+                    ANSI_COLOR_CYAN"      \\   \\     \\   \\    \\ \\",
+                    "    \\    \\    \\    \\   \\   \\"ANSI_COLOR_RESET};
+
+    char snowy[8][32] = {"             __________",
+                    "      ______(          )___",
+                    "   __(        (     )      )_",
+                    "  /       (           )      \\_",
+                    " (___(_________________________)",
+                    "      *     *      *   *    *",
+                    "   *    *       * *      *  *",
+                    "     *  *    *        *"};
+
+    if(!strcmp(wordToLower(weatherState),"sunny") 
+    || !strcmp(wordToLower(weatherState),"clear")){
+        for(int i = 0; i < 11; i++){
+            for(int j = 0; j < 24; j++){
+                printf("%c", sunny[i][j]);
+            }
+            printf("\n");
+        }
+    }
+        else if(!strcmp(wordToLower(weatherState),"cloudy") 
+            || contains(wordToLower(weatherState), "cloud")){
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 33; j++){
+                printf("%c", cloudy[i][j]);
+            }
+            printf("\n");
+        }
+    }
+        else if(contains(wordToLower(weatherState), "rain") 
+            || contains(wordToLower(weatherState), "drizzle")
+            || contains(wordToLower(weatherState), "shower")){
+        for(int i = 0; i < 7; i++){
+            for(int j = 0; j < 32; j++){
+                printf("%c", rainy[i][j]);
+            }
+            printf("\n");
+        }
+    }
+    else if(contains(wordToLower(weatherState), "snow")){
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 32; j++){
+                printf("%c", snowy[i][j]);
+            }
+            printf("\n");
+        }
+    }
+    else{
+        printf(ANSI_COLOR_RED"\nWeather icon unavailable\n"ANSI_COLOR_RESET);
+    }
+}
+
+char* wordToLower(char* word){
+    int len = strlen(word);
+    char* lowercase = malloc(sizeof(char) * len); 
+    int i = 0;
+    for(; i < len; i++){
+        lowercase[i] = tolower(word[i]);
+        }    
+    lowercase[i] = '\0';
+    return lowercase;
+}
+
+int contains(char* word, char* wordToCheck){
+    for(int i = 0, j = 0; i < strlen(word); i++){
+        if(j == strlen(wordToCheck) - 1){
+            return 1;
+        }
+        if(word[i] == wordToCheck[j]){
+            j++;
+        }
+        else
+            j = 0;
+    }    
+    return 0;
 }
