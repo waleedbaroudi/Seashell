@@ -171,7 +171,7 @@ Event* assignEvent(char* line){
     token = strtok(NULL, " ");
   }
   
-  char* time;
+  char* time = (char *) malloc(10);
   
   strcpy(time, timeSlots[1]);
   strcat(time, ":");
@@ -181,10 +181,10 @@ Event* assignEvent(char* line){
   
   strcat(time, timeSlots[0]);
   
-  char* date;
+  char* date = (char *) malloc(10);
   
   strcpy(date, timeSlots[2]);
-  strcat(date, "-");
+  strcat(date, "/");
   
   strcat(date, timeSlots[3]);
   
@@ -197,7 +197,7 @@ void printEventInfo(Event e){
   printf("| Title: \x1b[36m%s\x1b[0m\n", e.title);
   printf("| Description: \x1b[36m%s\x1b[0m\n", e.description);
   printf("|----------------------------------------+\n");
-  printf("| On: %s At: %s\n", e.date, e.time);
+  printf("| On: %s\t At: %s\n", e.date, e.time);
   printf("|----------------------------------------+\n");
   printf("| Reminder: %s\n", e.shouldRemind? "\x1b[32menabled\x1b[0m" : "\x1b[31mnot enabled\x1b[0m");
   printf("\\_________________________________________\n\n");
@@ -233,17 +233,19 @@ int main(int argc, char *argv[]) {
 	  }
 	  
 	  while(fgets(line, STR_LIMIT, schedsFile)){
-	    Event e = *assignEvent(line);
+	    Event *e = assignEvent(line);
 
 	    fgets(line2, STR_LIMIT, schedsFile);
 
 	    if(!strcmp(line2, "\n"))
-	      e.shouldRemind = 0;
+	      (*e).shouldRemind = 0;
 	    else
-	      e.shouldRemind = 1;
-	    printEventInfo(e);
-	    
+	      (*e).shouldRemind = 1;
+	    printEventInfo(*e);
+
+      free(e);
 	  }
+    return 0;
 	}
       return 1;
     }
