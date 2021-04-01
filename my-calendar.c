@@ -62,7 +62,7 @@ void rewindTenMinutes(char **min, char **hour, char **day, char **month) {
         return;
     }
 
-    sprintf(newHour, "%d", 11);
+    sprintf(newHour, "%d", 23);
     *hour = newHour;
 
     if (strcmp(*day, "all") == 0) // a daily reminder
@@ -207,9 +207,15 @@ void printInfo(){
   printf("+-------------------------------------------------------------------------------\n");
   printf("| Calendar Information:\n");
   printf("+-------------------------------------------------------------------------------\n");
-  printf("| - Type: 'calendar schedule <event title> <event describtion> <time hh:mm> <date mm/dd> <reminder (0 or 1))>' to schedule an event.\n");
-  printf("| - Type: 'calendar list' to list all scheduled events.\n");
-  printf("| - Type: 'calendar weather' to get today's weather.\n");
+  printf("| Schedule an event:\n");
+  printf("|   - calendar schedule <event title> <event describtion> <time hh:mm> <date mm/dd> [-r]\n");
+  printf("|   - add '-r' to the end of the command to be reminded 10 minutes prior to the event.\n");
+  printf("|\n");
+  printf("| Show scheduled events:\n");
+  printf("|   - calendar list\n");
+  printf("|\n");
+  printf("| Check the weather today:\n");
+  printf("|   - calendar weather-today\n");
   printf("+-------------------------------------------------------------------------------\n");
   
 }
@@ -258,7 +264,7 @@ int main(int argc, char *argv[]) {
 	  }
     return 0;
 	}
-      if (strcmp(option, "weather") == 0)
+      if (strcmp(option, "weather-today") == 0)
 	{
 	  char* argv[] = {"./weatherApi", NULL};
 	  if(execvp("./weatherApi", argv) == -1){
