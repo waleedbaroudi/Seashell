@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 
     // write cron job to a file
     FILE *tempCrontab = fopen(cronTempPath, "w");
-    fprintf(tempCrontab, "%s %s * * * DISPLAY=:0.0 rhythmbox-client --play %s\n", minute, hour, file); // write crontab job
+    fprintf(tempCrontab, "%s %s * * * XDG_RUNTIME_DIR=/run/user/$(id -u) DISPLAY=:0.0 rhythmbox-client --play %s\n", minute, hour, file); // write crontab job
     fclose(tempCrontab);
 
     // add job to crontab

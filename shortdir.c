@@ -108,7 +108,6 @@ void clear() {
 void list() {
    FILE *shortDirsFile;
    shortDirsFile = fopen(dirsPath, "r"); // open file
-   printf("\n"); // printing empty line for better presentation
    char name[255];
    char path[255];
     while (1)
