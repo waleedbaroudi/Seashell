@@ -247,6 +247,14 @@ int main(int argc, char *argv[]) {
 	  }
     return 0;
 	}
+      if (strcmp(option, "weather") == 0)
+	{
+	  char* argv[] = {"./weatherApi", NULL};
+	  if(execvp("./weatherApi", argv) == -1){
+	    printf("Command not found\n");
+	  }
+	}
+      
       return 1;
     }
     

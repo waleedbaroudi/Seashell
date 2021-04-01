@@ -53,7 +53,7 @@ void printWeather() {
   
 }
 
-int main()
+int main(int argc, char* argv[])
 {
   CURL *curl;
   CURLcode res;
