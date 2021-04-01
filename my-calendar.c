@@ -149,7 +149,10 @@ void schedule(Event *event) {
 }
 
 /**
- * Creates an Event struct instance with the information extracted from the given string.
+ * Given a string, exracts the required information for an event and returns an instance of Event struct with the
+ * extracted information
+ * @param  line    A string to extract event information from.
+ * @return         Returns an instance of the Event struct with the information extracted from the given string.
  */
 Event* assignEvent(char* line){
   
@@ -192,6 +195,10 @@ Event* assignEvent(char* line){
   
 }
 
+/**
+ * Prints information about a given event.
+ * @param e    An instance of the Event struct to exract information from.
+ */
 void printEventInfo(Event e){
   printf(" _________________________________________\n/\n");
   printf("| Title: \x1b[36m%s\x1b[0m\n", e.title);
@@ -203,19 +210,22 @@ void printEventInfo(Event e){
   printf("\\_________________________________________\n\n");
 }
 
+/**
+ * Prints information about the use of my-calendar command.
+ */
 void printInfo(){
   printf("+-------------------------------------------------------------------------------\n");
-  printf("| Calendar Information:\n");
+  printf("| My Calendar Information:\n");
   printf("+-------------------------------------------------------------------------------\n");
   printf("| Schedule an event:\n");
-  printf("|   - calendar schedule <event title> <event describtion> <time hh:mm> <date mm/dd> [-r]\n");
+  printf("|   - my-calendar schedule <event title> <event describtion> <time hh:mm> <date mm/dd> [-r]\n");
   printf("|   - add '-r' to the end of the command to be reminded 10 minutes prior to the event.\n");
   printf("|\n");
   printf("| Show scheduled events:\n");
-  printf("|   - calendar list\n");
+  printf("|   - ny-calendar list\n");
   printf("|\n");
   printf("| Check the weather today:\n");
-  printf("|   - calendar weather-today\n");
+  printf("|   - ny-calendar weather-today\n");
   printf("+-------------------------------------------------------------------------------\n");
   
 }

@@ -18,7 +18,7 @@ char* substring(char* str,  int to);
 
 int main(int argc, char *argv[]){
   
-  char* word = argv[1]; // To convert the string into a lowercase character.
+  char* word = argv[1];
   char* color = argv[2];
   char* filePath = argv[3];
 
