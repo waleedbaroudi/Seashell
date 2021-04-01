@@ -203,6 +203,17 @@ void printEventInfo(Event e){
   printf("\\_________________________________________\n\n");
 }
 
+void printInfo(){
+  printf("+-------------------------------------------------------------------------------\n");
+  printf("| Calendar Information:\n");
+  printf("+-------------------------------------------------------------------------------\n");
+  printf("| - Type: 'calendar schedule <event title> <event describtion> <time hh:mm> <date mm/dd> <reminder (0 or 1))>' to schedule an event.\n");
+  printf("| - Type: 'calendar list' to list all scheduled events.\n");
+  printf("| - Type: 'calendar weather' to get today's weather.\n");
+  printf("+-------------------------------------------------------------------------------\n");
+  
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -254,7 +265,8 @@ int main(int argc, char *argv[]) {
 	    printf("Command not found\n");
 	  }
 	}
-      
+      if (strcmp(option, "--help") == 0)	
+	printInfo();      
       return 1;
     }
     
