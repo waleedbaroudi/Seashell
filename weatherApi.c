@@ -16,6 +16,7 @@ void printWeatherIcon(char* weatherState);
 char* getTempColor(double tempreture);
 char* wordToLower(char* word);
 int contains(char* word, char* wordToCheck);
+char* getHumidityColor(double humidity);
 
 char* myData;
 size_t dataLen;
@@ -45,7 +46,10 @@ void printWeather() {
   char *degPart = strtok(NULL, ":");
   char* tempreture = strtok(degPart, ",");
 
-  printfWeather(weatherCondition, tempreture, humidity);
+  char *tempPtr;
+  char *humPtr;
+  
+  printfWeather(weatherCondition, strtod(tempreture, &tempPtr), strtod(humidity, &humPtr));
   
 }
 
@@ -90,29 +94,43 @@ int main()
 void printfWeather(char* weatherState, double tempreture, double humidity){
 
     printf("+-------------------------------------------------------------------+\n");
-    printf("| Weather: %s | Tempreture: %s%.2f%s C | Humidity: %.1f%%  |\n", weatherState, getTempColor(tempreture), tempreture, ANSI_COLOR_RESET, humidity);
+    printf("| Weather: %s | Tempreture: %s%.2f%s C | Humidity:%s %.1f%%%s  |\n", weatherState, getTempColor(tempreture), tempreture, ANSI_COLOR_RESET, getHumidityColor(humidity), humidity, ANSI_COLOR_RESET);
     printf("+-------------------------------------------------------------------+\n\n");
 
     printWeatherIcon(weatherState);
 
-    printf("_____________________________________________________________\n\n");
+    printf("_____________________________________________________________________\n\n");
 }
 
 /**
  * Given a tempreture vlaue in Celius, returns the tempreture with a describtive color.
  */
 char* getTempColor(double tempreture){
-    if(tempreture <= 15){
-        return ANSI_COLOR_BLUE;
-    }
-    else if(tempreture <= 35 && tempreture > 15){
+    if(tempreture <= 15)
+        return ANSI_COLOR_CYAN;
+    
+    else if(tempreture <= 35 && tempreture > 15)
         return ANSI_COLOR_GREEN;
-    }
-    else if(tempreture > 35){
+    
+    else if(tempreture > 35)
         return ANSI_COLOR_RED;
-    }
+    
     return ANSI_COLOR_RESET;
 }
+
+char* getHumidityColor(double humidity){
+    if(humidity <= 20)
+        return ANSI_COLOR_CYAN;
+
+    else if(humidity > 20 && humidity <= 75)
+      return ANSI_COLOR_GREEN;
+    
+    else if(humidity > 75)
+        return ANSI_COLOR_RED;
+  
+    return ANSI_COLOR_RESET;
+}
+
 
 void printWeatherIcon(char* weatherState){
 
