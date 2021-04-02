@@ -50,7 +50,7 @@ void rewindTenMinutes(char **min, char **hour, char **day, char **month) {
     sprintf(newMin, "%d", 60+(numMin-10));
     *min = newMin;
 
-    if (strcmp(*hour, "all") == 0) // an hourly reminder
+    if (strcmp(*hour, "*") == 0) // an hourly reminder
         return;
 
     int numHour = atoi(*hour);
@@ -65,7 +65,7 @@ void rewindTenMinutes(char **min, char **hour, char **day, char **month) {
     sprintf(newHour, "%d", 23);
     *hour = newHour;
 
-    if (strcmp(*day, "all") == 0) // a daily reminder
+    if (strcmp(*day, "*") == 0) // a daily reminder
         return;
 
     int numDay = atoi(*day);
@@ -80,7 +80,7 @@ void rewindTenMinutes(char **min, char **hour, char **day, char **month) {
     sprintf(newDay, "%d", 30); // assuming all months are 30 days
     *day = newDay;
 
-    if (strcmp(*month, "all") == 0) // a monthly reminder
+    if (strcmp(*month, "*") == 0) // a monthly reminder
         return;
 
     int numMonth = atoi(*month);
@@ -96,6 +96,13 @@ void rewindTenMinutes(char **min, char **hour, char **day, char **month) {
     *month = newMonth;
 }
 
+void applyCrontab() {
+    char *argv[3];
+    argv[0] = "crontab";
+    argv[1] = schedsPath;
+    argv[2] = NULL;
+    execvp("crontab", argv);
+}
 
 void schedule(Event *event) {
     Event e = *event;
@@ -141,11 +148,7 @@ void schedule(Event *event) {
     
     printf("Scheduling...\n");
     
-    char *argv[3];
-    argv[0] = "crontab";
-    argv[1] = schedsPath;
-    argv[2] = NULL;
-    execvp("crontab", argv);
+    applyCrontab();
 }
 
 /**
@@ -219,13 +222,17 @@ void printInfo(){
   printf("+-------------------------------------------------------------------------------\n");
   printf("| Schedule an event:\n");
   printf("|   - my-calendar schedule <event title> <event describtion> <time hh:mm> <date mm/dd> [-r]\n");
+  printf("|   - if title or description consists of more than 1 word, words should be dash-separated\n");
   printf("|   - add '-r' to the end of the command to be reminded 10 minutes prior to the event.\n");
   printf("|\n");
   printf("| Show scheduled events:\n");
-  printf("|   - ny-calendar list\n");
+  printf("|   - my-calendar list\n");
   printf("|\n");
   printf("| Check the weather today:\n");
-  printf("|   - ny-calendar weather-today\n");
+  printf("|   - my-calendar weather-today\n");
+  printf("|\n");
+  printf("| Clear all scheduled events:\n");
+  printf("|   - my-calendar clear\n");
   printf("+-------------------------------------------------------------------------------\n");
   
 }
@@ -241,13 +248,13 @@ int main(int argc, char *argv[]) {
       
       char* option = argv[1];
       
-      if (strcmp(option, "schedule") == 0)
+  if (strcmp(option, "schedule") == 0)
 	{
 	  Event *event = makeEvent(argv[2], argv[3], argv[4], argv[5], argv[6]);
 	  schedule(event);
 	  return 0;
 	}
-      if (strcmp(option, "list") == 0)
+  if (strcmp(option, "list") == 0)
 	{
 	  char line[STR_LIMIT];
 	  char line2[STR_LIMIT];
@@ -274,15 +281,27 @@ int main(int argc, char *argv[]) {
 	  }
     return 0;
 	}
-      if (strcmp(option, "weather-today") == 0)
+  if (strcmp(option, "weather-today") == 0)
 	{
 	  char* argv[] = {"./weatherApi", NULL};
 	  if(execvp("./weatherApi", argv) == -1){
 	    printf("Command not found\n");
+      return 1;
 	  }
+    return 0;
 	}
-      if (strcmp(option, "--help") == 0)	
-	printInfo();      
+
+  if (strcmp(option, "clear") == 0)
+	{
+	  fclose(fopen(schedsPath, "w+")); // erase scheds
+    applyCrontab(); // erase crontab
+    return 0;
+	}
+
+  if (strcmp(option, "--help") == 0){
+	      printInfo();      
+        return 0;
+      }
       return 1;
     }
     
