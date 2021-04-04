@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
 	  char line[STR_LIMIT];
 	  char line2[STR_LIMIT];
 	  FILE *schedsFile;
-	  schedsFile = fopen(schedsPath, "r");
+	  schedsFile = fopen(schedsPath, "a+");
 	  
 	  if(schedsFile == NULL){
 	    printf("Failed to open file.\n");
