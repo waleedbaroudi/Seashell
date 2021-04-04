@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 #define STR_LIMIT 1000
 
@@ -237,6 +239,8 @@ void printInfo(){
   
 }
 
+void getWeather();
+
 
 int main(int argc, char *argv[]) {
 
@@ -283,12 +287,8 @@ int main(int argc, char *argv[]) {
 	}
   if (strcmp(option, "weather-today") == 0)
 	{
-	  char* argv[] = {"./weatherApi", NULL};
-	  if(execvp("./weatherApi", argv) == -1){
-	    printf("Command not found\n");
-      return 1;
-	  }
-    return 0;
+    getWeather();
+    return 1;
 	}
 
   if (strcmp(option, "clear") == 0)
@@ -305,3 +305,25 @@ int main(int argc, char *argv[]) {
       return 1;
     }
     
+void getWeather() {
+  // get path from shared memory
+  int path_shm = shm_open("SEASHELL_HOME", O_RDONLY, 0666);
+  if (path_shm == -1) {
+	  printf("Command not found - failed to open memory\n");
+		return;
+	}
+  char *path_ptr = (char *) mmap(0,PATH_MAX, PROT_READ, MAP_SHARED, path_shm, 0);
+  if (path_ptr == MAP_FAILED) {
+	  printf("Command not found - failed to map\n");
+		return;
+	}
+  
+  char path[PATH_MAX];
+  strcpy(path, path_ptr);
+  strcat(path, "/weatherApi");
+  printf("%s\n", path);
+	char* argv[] = {path, NULL};
+	execv(path, argv);
+  // could not run the command.
+	printf("Command not found - failed to exec\n");
+}

@@ -7,8 +7,14 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <limits.h>
+// for shared memory
+#include <sys/mman.h>
+#include <fcntl.h>
+
+
 
 const char * sysname = "seashell";
+const char * shm_name = "SEASHELL_HOME";
 
 enum return_codes {
 	SUCCESS = 0,
@@ -316,14 +322,15 @@ char *homedir; // home directory on the current machine (to place the shortdirs 
 char dirsPath[PATH_MAX]; // file path of the text file stroing shortdirs
 ////
 char customCommandDir[PATH_MAX]; // Path to custom command executables
+void setCustomCommandDir();
 
 int main()
 {
-  getcwd(customCommandDir, sizeof(customCommandDir));
+	setCustomCommandDir();
 	// set home and shortdir paths
-   homedir = getenv("HOME");
-   strcpy(dirsPath, homedir);
-   strcat(dirsPath, "/Documents/dirs.txt");
+   	homedir = getenv("HOME");
+   	strcpy(dirsPath, homedir);
+   	strcat(dirsPath, "/Documents/dirs.txt");
 
 	while (1)
 	{
@@ -349,8 +356,10 @@ int process_command(struct command_t *command)
 	int r;
 	if (strcmp(command->name, "")==0) return SUCCESS;
 
-	if (strcmp(command->name, "exit")==0)
+	if (strcmp(command->name, "exit")==0){
+		shm_unlink(shm_name);
 		return EXIT;
+	}
 
 	if (strcmp(command->name, "cd")==0)
 	{
@@ -396,7 +405,6 @@ int process_command(struct command_t *command)
 		//		execvp(command->name, command->args); // exec+args+path
 		executeCommand(command->name, command->args);
 		exit(0);
-		/// TODO: do your own exec with path resolving using execv()
 	}
 	else
 	{
@@ -405,10 +413,33 @@ int process_command(struct command_t *command)
 		return SUCCESS;
 	}
 
-	// TODO: your implementation here
 
 	printf("-%s: %s: command not found\n", sysname, command->name);
 	return UNKNOWN;
+}
+
+/**
+ * this function sets the directory of the custom-made commands to the initial directory of seashell.
+ * this also puts the path in shared memory so that other commands can share it run child custom commands.
+ */
+void setCustomCommandDir() {
+	int pathSize = sizeof(customCommandDir);
+  	getcwd(customCommandDir, pathSize);
+	int path_shm = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
+	if (path_shm == -1)
+	{
+		printf("WARNING: failed to share home path, some commands may not work properly.\n");
+		return;
+	}
+	ftruncate(path_shm, pathSize);
+	
+	void *path_ptr = mmap(0, pathSize, PROT_READ | PROT_WRITE, MAP_SHARED, path_shm, 0);
+	if (path_ptr == MAP_FAILED)
+	{
+		printf("WARNING: failed to share home path, some commands may not work properly.\n");
+		return;
+	}
+	sprintf(path_ptr, "%s", customCommandDir);
 }
 
 /**
@@ -429,7 +460,7 @@ int numberOfOccurances(char* str, char charToFind){
   return count;
 }
 
-//----Shortdir Implementation----------------------------
+//----Shortdir Jump Implementation----------------------------
 void jump(char* input) {
    FILE *shortDirsFile;
 
