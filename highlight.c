@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define COLOR_RED   "\x1b[31m"
 #define COLOR_GREEN "\x1b[32m"
@@ -15,6 +16,8 @@ char* coloredToken(char* word, char* compareTo, char* color);
 char* getColor(char* color);
 char* getColoredWord(char* word, char* color);
 char* substring(char* str,  int to);
+int contains(char* word, char* wordToCheck);
+char* wordToLower(char* word);
 
 int main(int argc, char *argv[]){
   
@@ -48,11 +51,15 @@ int main(int argc, char *argv[]){
  * @param  color  The color to highlight the given word with.       
  */
 void colorWordsInLine(char* text, char* word, char* color){
+
+  if(!contains(wordToLower(text), wordToLower(word)))
+    return;
+  
   char delim[] = " ";
 
   char *token = strtok(text, delim);
   char lines[200] = "";
-  
+
   while(token != NULL){
     if(token[strlen(token) - 1] == '\n'){
       strcat(lines, coloredToken(substring(token, strlen(token) - 1), word, color));    
@@ -68,7 +75,7 @@ void colorWordsInLine(char* text, char* word, char* color){
 }
 
 /**
- * Given two strings word and compateTo, colors compateTo if word and compareTo match and return compareTo.
+ * Given two strings word and compareTo, colors compareTo if word and compareTo match and return compareTo.
  * return word otherwise.
  * @param  word          A string to compare with the other string.
  * @param  compareTo     A string to compare with the other stirng.
@@ -79,22 +86,25 @@ void colorWordsInLine(char* text, char* word, char* color){
 char* coloredToken(char* word, char* compareTo, char* color){
     char temp[strlen(compareTo) + 1];
 
-    strcpy(temp, compareTo);
+    char* lcWord = wordToLower(word);
+    char* lcCompareTo = wordToLower(compareTo);
+    
+    strcpy(temp, lcCompareTo);
 
-    if(!strcmp(word, temp)){
-        return getColoredWord(compareTo, color);
+    if(!strcmp(lcWord, temp)){
+        return getColoredWord(word, color);
     }
-    else if(!strcmp(word, strcat(temp, "."))){
-        return strcat(getColoredWord(compareTo, color), ".");
+    else if(!strcmp(lcWord, strcat(temp, "."))){ 
+      return strcat(getColoredWord(substring(word, strlen(word) - 1), color), ".");
     }
-    else if(!strcmp(word, strcat(strcpy(temp, compareTo), ","))){
-        return strcat(getColoredWord(compareTo, color), ",");
+    else if(!strcmp(lcWord, strcat(strcpy(temp, compareTo), ","))){
+      return strcat(getColoredWord(substring(word, strlen(word) - 1), color), ",");
     }
-    else if(!strcmp(word, strcat(strcpy(temp, compareTo), "!"))){
-        return strcat(getColoredWord(compareTo, color), "!");
+    else if(!strcmp(lcWord, strcat(strcpy(temp, compareTo), "!"))){
+      return strcat(getColoredWord(substring(word, strlen(word) - 1), color), "!");
     }
-    else if(!strcmp(word, strcat(strcpy(temp, compareTo), "?"))){
-        return strcat(getColoredWord(compareTo, color), "?");
+    else if(!strcmp(lcWord, strcat(strcpy(temp, compareTo), "?"))){
+      return strcat(getColoredWord(substring(word, strlen(word) - 1), color), "?");
     }
     
     return word;
@@ -152,5 +162,39 @@ char* substring(char* str,  int to){
   return strcat(sub, "");
 }
 
+/**
+ * Given a string and a word, checks if the given string contains the given words.
+ * @param  word           A string to check if the given word is within.
+ * @param  wordToCheck    A word to be checked if within the given string.
+ * @return                Returns 1 if the given word in within the given string and 0 otherwise.
+ */
+int contains(char* word, char* wordToCheck){
+    for(int i = 0, j = 0; i < strlen(word); i++){
+        if(j == strlen(wordToCheck) - 1){
+            return 1;
+        }
+        if(word[i] == wordToCheck[j]){
+            j++;
+        }
+        else
+            j = 0;
+    }    
+    return 0;
+}
 
+/**
+ * Given a string, returns the lowercase version of it.
+ * @param  word   A word to get the lowercase version of.
+ * @return        Returns a lowercase version of the given word.
+ */
+char* wordToLower(char* word){
+    int len = strlen(word);
+    char* lowercase = malloc(sizeof(char) * len); 
+    int i = 0;
+    for(; i < len; i++){
+        lowercase[i] = tolower(word[i]);
+        }    
+    lowercase[i] = '\0';
+    return lowercase;
+}
 
