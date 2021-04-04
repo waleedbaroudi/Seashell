@@ -182,7 +182,8 @@ void printWeatherIcon(char* weatherState){
         }
     }
         else if(!strcmp(wordToLower(weatherState),"cloudy") 
-            || contains(wordToLower(weatherState), "cloud")){
+            || contains(wordToLower(weatherState), "cloud")
+            || contains(wordToLower(weatherState), "fog")){
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 33; j++){
                 printf("%c", cloudy[i][j]);
