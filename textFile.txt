@@ -1,2 +1,4 @@
-The programming language used for this code is C.
-The first! three letters? of English language are A B and C.
+The programming Language used for this code is c.
+The first! three letters? of English lanGUage are A B and C.
+
+The first! three letters? of English are A B and c.

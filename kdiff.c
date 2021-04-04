@@ -44,14 +44,14 @@ void diffText(char *first, char* second) {
     // counter variables for the number of lines read and differences found
     int differences = 0, lineCount = 1;
     // char buffers to store the lines
-    char line1 [255];
-    char line2 [255];
+    char line1 [511];
+    char line2 [511];
 
     while (1)
     {
         // read a line from both files
-        fgets(line1, 255, file1);
-        fgets(line2, 255, file2);
+        fgets(line1, 511, file1);
+        fgets(line2, 511, file2);
         // if both files ended, stop
         if (feof(file1) && feof(file2))
             break;
