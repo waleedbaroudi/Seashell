@@ -2,6 +2,7 @@
 #include<string.h>
 #include<stdlib.h>
 
+int isTextFile(char *file);
 void diffText(char *first, char* second);
 void diffBinary(char *first, char* second);
 
@@ -16,9 +17,26 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+
+/**
+ * checks whether a given path points to a text file
+ * @param file the path to be checked 
+ */
+int isTextFile(char *file) {
+    char *temp = malloc(sizeof(file));
+    strcpy(temp, file);
+    strtok(temp, ".");
+    return !(strcmp(strtok(NULL, "."), "txt"));
+}
+
 void diffText(char *first, char* second) {
     printf("[Text kdiff]\n");
-
+    if (!isTextFile(first) || !isTextFile(second))
+    {
+        printf("ERROR: This mode only comapres text files (extension .txt)\n");
+        return;
+    }
+    
     // open the two input files for reading
     FILE *file1 = fopen(first, "r");
     FILE *file2 = fopen(second, "r");

@@ -1,0 +1,5 @@
+kdiff commands
+is supposed to
+compare three
+files
+and find differences in them
