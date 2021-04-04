@@ -26,7 +26,8 @@ int isTextFile(char *file) {
     char *temp = malloc(sizeof(file));
     strcpy(temp, file);
     strtok(temp, ".");
-    return !(strcmp(strtok(NULL, "."), "txt"));
+    char* extension = strtok(NULL, ".");
+    return !(extension == NULL || (strcmp(extension, "txt")));
 }
 
 void diffText(char *first, char* second) {
@@ -104,8 +105,8 @@ void diffBinary(char *first, char* second) {
     while (1)
     {
         // read a byte from each files
-        byte1 = getc(file1);
-        byte2 = getc(file2);
+        byte1 = fgetc(file1);
+        byte2 = fgetc(file2);
         // difference bytes, count difference
         if (byte2!=byte1)
         {
